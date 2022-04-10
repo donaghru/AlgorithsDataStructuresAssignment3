@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class mainLine
@@ -22,98 +23,143 @@ public class mainLine
         Scanner input = new Scanner(System.in);
         while(!exitFlag)
         {
-            System.out.print("Welcome to Vancouver Bus Service: ");
+            System.out.print("Welcome to Vancouver Bus Service(Methods:route,search,time): ");
             String newInput = input.next();
             if (newInput.equalsIgnoreCase("quit")) exitFlag = true;
             else if(newInput.equalsIgnoreCase("route"))
             {
-                int firstStop = -1;
-                int secondStop = -1;
-                boolean firstStopFound=false;
-                while((!firstStopFound)&&(!exitFlag))
+                boolean backFlag=false;
+                while((!backFlag)&&(!exitFlag))
                 {
-                    System.out.print("Enter first stop: ");
-                    if(input.hasNextInt())
+                    int firstStop = -1;
+                    int secondStop = -1;
+                    boolean firstStopFound=false;
+                    while((!firstStopFound)&&(!exitFlag)&&(!backFlag))
                     {
-                        firstStop = input.nextInt();
-                        if(stops[firstStop].used==true)firstStopFound=true;
-                        else System.out.println("Stop is not in use");
+                        System.out.print("Enter first stop: ");
+                        if(input.hasNextInt())
+                        {
+                            firstStop = input.nextInt();
+                            if(stops[firstStop].used==true)firstStopFound=true;
+                            else System.out.println("Stop is not in use");
+                        }
+                        else
+                        {
+                            String query=input.next();
+                            if(query.equalsIgnoreCase("quit")) exitFlag = true;
+                            else if(query.equalsIgnoreCase("back")) backFlag = true;
+                            else System.out.println("Invalid input");
+                        }
                     }
-                    else if(input.next().equalsIgnoreCase("quit")) exitFlag = true;
-                    else System.out.println("Invalid input");
-                }
-                boolean secondStopFound=false;
-                while((!secondStopFound)&&(!exitFlag))
-                {
-                    System.out.print("Enter second stop: ");
-                    if(input.hasNextInt())
+                    boolean secondStopFound=false;
+                    while((!secondStopFound)&&(!exitFlag)&&(!backFlag))
                     {
-                        secondStop = input.nextInt();
-                        if(stops[secondStop].used==true)secondStopFound=true;
-                        else System.out.println("Stop is not in use");
+                        System.out.print("Enter second stop: ");
+                        if(input.hasNextInt())
+                        {
+                            secondStop = input.nextInt();
+                            if(stops[secondStop].used==true)secondStopFound=true;
+                            else System.out.println("Stop is not in use");
+                        }
+                        else
+                        {
+                            String query=input.next();
+                            if(query.equalsIgnoreCase("quit")) exitFlag = true;
+                            else if(query.equalsIgnoreCase("back")) backFlag = true;
+                            else System.out.println("Invalid input");
+                        }
                     }
-                    else if(input.next().equalsIgnoreCase("quit")) exitFlag = true;
-                    else System.out.println("Invalid input");
+                    if((!backFlag)&&(!exitFlag))dijkstraPath(stops,firstStop,secondStop);
                 }
-                if(!exitFlag)dijkstraPath(stops,firstStop,secondStop);
             }
             else if(newInput.equalsIgnoreCase("search"))
             {
-                TernaryTree newTree= setupTree();
-                System.out.print("Enter search query: ");
-                String query = input.next();
-                query=query.toUpperCase();
-                ArrayList<Integer> searchHits= new ArrayList<Integer>();
-                if(query.equalsIgnoreCase("quit")) exitFlag = true;
-                else searchHits= newTree.get(query);
-                if(searchHits!=null)
+                boolean backFlag=false;
+                while((!backFlag)&&(!exitFlag))
                 {
-                    try
-                    {
-                        FileReader fileReader = new FileReader("stops.txt");   //reads in textfile
-                        BufferedReader bufferedReader = new BufferedReader(fileReader);
-                        boolean endOfFile = false;  //tracks end of file
-                        int currentLine = 0;
-                        while (!endOfFile)   //loop persists until end of file
-                        {
-                            String Line = bufferedReader.readLine();   //read street information
-                            if (Line != null)
+                    TernaryTree newTree = setupTree();
+                    System.out.print("Enter search query: ");
+                    String query = input.next();
+                    query = query.toUpperCase();
+                    ArrayList<Integer> searchHits = new ArrayList<Integer>();
+                    if (query.equalsIgnoreCase("quit")) exitFlag = true;
+                    else if(query.equalsIgnoreCase("back")) backFlag = true;
+                    else searchHits = newTree.get(query);
+                    if (searchHits != null) {
+                        try {
+                            FileReader fileReader = new FileReader("stops.txt");   //reads in textfile
+                            BufferedReader bufferedReader = new BufferedReader(fileReader);
+                            boolean endOfFile = false;  //tracks end of file
+                            int currentLine = 0;
+                            while (!endOfFile)   //loop persists until end of file
                             {
-                                for (int i = 0; i < searchHits.size(); i++)
+                                String Line = bufferedReader.readLine();   //read street information
+                                if (Line != null)
                                 {
-                                    if (currentLine == searchHits.get(i)) System.out.println(Line);
+                                    for (int i = 0; i < searchHits.size(); i++)
+                                    {
+                                        if (currentLine == searchHits.get(i)) System.out.println(Line);
+                                    }
                                 }
+                                else
+                                {
+                                    endOfFile = true;   //ends loop once file is empty
+                                }
+                                currentLine++;
                             }
-                            else
-                            {
-                                endOfFile = true;   //ends loop once file is empty
-                            }
-                            currentLine++;
+                            bufferedReader.close();
+                            fileReader.close();
+                        } // End try
+                        catch (FileNotFoundException e)
+                        {
+                            e.printStackTrace();
                         }
-                        bufferedReader.close();
-                        fileReader.close();
-                    } // End try
-                    catch (FileNotFoundException e)
-                    {
-                        e.printStackTrace();
+                        catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        System.out.println("No matches present");
                     }
-                    catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                else
-                {
-                    System.out.println("No matches present");
                 }
             }
             else if(newInput.equalsIgnoreCase("time"))
             {
-                System.out.print("Enter time query: ");
-                String query = input.next();
-                checkTimes(query);
+                boolean backFlag=false;
+                while((!backFlag)&&(!exitFlag))
+                {
+                    System.out.print("Enter time query(hh:mm:ss): ");
+                    String query = input.next();
+                    if(query.equalsIgnoreCase("quit")) exitFlag = true;
+                    else if(query.equalsIgnoreCase("back")) backFlag = true;
+                    else {
+                        try {
+                            String[] timeData = query.trim().split(":");   //separates information into array of data
+                            int hours = Integer.parseInt(timeData[0]);
+                            int minutes = Integer.parseInt(timeData[1]);
+                            int seconds = Integer.parseInt(timeData[2]);
+                            if ((hours >= 0 && hours < 24) && (minutes >= 0 && minutes < 60) && (seconds >= 0 && seconds < 60)) {
+                                ArrayList<TimeListNode> StopData = checkTimes(query);
+                                int[] ids = new int[StopData.size()];
+                                for (int i = 0; i < ids.length; i++) {
+                                    ids[i] = StopData.get(i).id;
+                                }
+                                Arrays.sort(ids);
+                                for (int i = 0; i < StopData.size(); i++) {
+                                    for (int j = 0; j < StopData.size(); j++) {
+                                        if (ids[i] == StopData.get(j).id) System.out.println(StopData.get(j).data);
+                                    }
+                                }
+                            } else System.out.println("Invalid Input");
+                        }
+                        catch(NumberFormatException e)
+                        {
+                            System.out.println("Invalid Input");
+                        }
+                    }
+                }
             }
-            else System.out.println("Unknown mode");
+            else System.out.println("Invalid Input");
         }
     }
 
@@ -315,7 +361,7 @@ public class mainLine
         }
     }
 
-    void checkTimes(String searchTime)
+    ArrayList<TimeListNode> checkTimes(String searchTime)
     {
         try
         {
@@ -323,16 +369,20 @@ public class mainLine
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             boolean endOfFile = false;  //tracks end of file
             bufferedReader.readLine();   //skip first line
+            ArrayList<TimeListNode> data= new ArrayList<TimeListNode>();
             while(!endOfFile)   //loop persists until end of file
             {
                 String timeDetails = bufferedReader.readLine();   //read street information
                 if (timeDetails != null)
                 {
-                    String[] timeData = timeDetails.trim().split(",");   //separates information into array of three pieces of data
+                    String[] timeData = timeDetails.trim().split(",");   //separates information into array of data
                     String time= timeData[1];
                     String[] timeParts = time.trim().split(":");
                     int hours= Integer.parseInt(timeParts[0]);
-                    if(time.trim().equals(searchTime)&&hours<24) System.out.println(timeDetails);
+                    if(time.trim().equals(searchTime)&&hours<24)
+                    {
+                        data.add(new TimeListNode(Integer.parseInt(timeData[0]),timeDetails));
+                    }
                 }
                 else
                 {
@@ -341,6 +391,7 @@ public class mainLine
             }
             bufferedReader.close();
             fileReader.close();
+            return data;
         } // End try
         catch (FileNotFoundException e)
         {
@@ -350,5 +401,6 @@ public class mainLine
         {
             e.printStackTrace();
         }
+        return null;
     }
 }
