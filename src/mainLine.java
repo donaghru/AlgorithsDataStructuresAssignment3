@@ -109,7 +109,9 @@ public class mainLine
             }
             else if(newInput.equalsIgnoreCase("time"))
             {
-                checkTimes();
+                System.out.print("Enter time query: ");
+                String query = input.next();
+                checkTimes(query);
             }
             else System.out.println("Unknown mode");
         }
@@ -313,7 +315,7 @@ public class mainLine
         }
     }
 
-    void checkTimes()
+    void checkTimes(String searchTime)
     {
         try
         {
@@ -324,31 +326,13 @@ public class mainLine
             while(!endOfFile)   //loop persists until end of file
             {
                 String timeDetails = bufferedReader.readLine();   //read street information
-                if (stopDetails != null)
+                if (timeDetails != null)
                 {
-                    String[] stopData = stopDetails.trim().split(",");   //separates information into array of three pieces of data
-                    String name= stopData[2];
-                    String[] partsOfName = name.trim().split(" ");
-                    String firstWord= partsOfName[0];
-                    if(firstWord.equalsIgnoreCase("flagstop")||
-                            firstWord.equalsIgnoreCase("wb")||
-                            firstWord.equalsIgnoreCase("nb")||
-                            firstWord.equalsIgnoreCase("sb")||
-                            firstWord.equalsIgnoreCase("eb"))
-                    {
-                        for (int i = 1; i < partsOfName.length; i++)
-                        {
-                            partsOfName[i - 1] = partsOfName[i];
-                        }
-                        partsOfName[partsOfName.length - 1] = firstWord;
-                    }
-                    String treeInsertString="";
-                    for (int i =0; i < partsOfName.length; i++)
-                    {
-                        treeInsertString+=partsOfName[i];
-                    }
-                    newTree.put(treeInsertString,lineNumber);
-                    lineNumber++;
+                    String[] timeData = timeDetails.trim().split(",");   //separates information into array of three pieces of data
+                    String time= timeData[1];
+                    String[] timeParts = time.trim().split(":");
+                    int hours= Integer.parseInt(timeParts[0]);
+                    if(time.trim().equals(searchTime)&&hours<24) System.out.println(timeDetails);
                 }
                 else
                 {
@@ -357,7 +341,6 @@ public class mainLine
             }
             bufferedReader.close();
             fileReader.close();
-            return newTree;
         } // End try
         catch (FileNotFoundException e)
         {
