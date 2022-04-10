@@ -1,3 +1,5 @@
+//@author Ruairi Donaghey, ROBERT SEDGEWICK | KEVIN WAYNE
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
