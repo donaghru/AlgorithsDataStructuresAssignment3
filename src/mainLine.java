@@ -12,13 +12,7 @@ public class mainLine
     public static void main(String[] args)
     {
         mainLine a = new mainLine();
-        //a.busService();
-        TernaryTree b = new TernaryTree();
-        b.put("are",0);
-        b.put("angle",1);
-        b.put("uncle",2);
-        b.put("glue",3);
-        ArrayList<Integer> matches=b.get("glue");
+        a.busService();
     }
 
     void busService()
@@ -63,6 +57,61 @@ public class mainLine
                 }
                 if(!exitFlag)dijkstraPath(stops,firstStop,secondStop);
             }
+            else if(newInput.equalsIgnoreCase("search"))
+            {
+                TernaryTree newTree= setupTree();
+                System.out.print("Enter search query: ");
+                String query = input.next();
+                query=query.toUpperCase();
+                ArrayList<Integer> searchHits= new ArrayList<Integer>();
+                if(query.equalsIgnoreCase("quit")) exitFlag = true;
+                else searchHits= newTree.get(query);
+                if(searchHits!=null)
+                {
+                    try
+                    {
+                        FileReader fileReader = new FileReader("stops.txt");   //reads in textfile
+                        BufferedReader bufferedReader = new BufferedReader(fileReader);
+                        boolean endOfFile = false;  //tracks end of file
+                        int currentLine = 0;
+                        while (!endOfFile)   //loop persists until end of file
+                        {
+                            String Line = bufferedReader.readLine();   //read street information
+                            if (Line != null)
+                            {
+                                for (int i = 0; i < searchHits.size(); i++)
+                                {
+                                    if (currentLine == searchHits.get(i)) System.out.println(Line);
+                                }
+                            }
+                            else
+                            {
+                                endOfFile = true;   //ends loop once file is empty
+                            }
+                            currentLine++;
+                        }
+                        bufferedReader.close();
+                        fileReader.close();
+                    } // End try
+                    catch (FileNotFoundException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                else
+                {
+                    System.out.println("No matches present");
+                }
+            }
+            else if(newInput.equalsIgnoreCase("time"))
+            {
+                checkTimes();
+            }
+            else System.out.println("Unknown mode");
         }
     }
 
@@ -156,22 +205,44 @@ public class mainLine
         return null;
     }
 
-    void setup()
+    TernaryTree setupTree()
     {
         try
         {
-            FileReader fileReader = new FileReader("stops");   //reads in textfile
+            FileReader fileReader = new FileReader("stops.txt");   //reads in textfile
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             boolean endOfFile = false;  //tracks end of file
-            Integer.parseInt(bufferedReader.readLine());   //skip first line
+            bufferedReader.readLine();   //skip first line
+            TernaryTree newTree = new TernaryTree();
+            int lineNumber=1;
             while(!endOfFile)   //loop persists until end of file
             {
-                String streetDetails = bufferedReader.readLine();   //read street information
-                if (streetDetails != null)
+                String stopDetails = bufferedReader.readLine();   //read street information
+                if (stopDetails != null)
                 {
                     String[] stopData = stopDetails.trim().split(",");   //separates information into array of three pieces of data
-                    String name= stopData
-                    currentIntersection.createStreet(Double.parseDouble(streetData[2]),currentDestination);     //creates new edge with weight and endpoint data, and stores it in the vertex at the start of the edge
+                    String name= stopData[2];
+                    String[] partsOfName = name.trim().split(" ");
+                    String firstWord= partsOfName[0];
+                    if(firstWord.equalsIgnoreCase("flagstop")||
+                            firstWord.equalsIgnoreCase("wb")||
+                            firstWord.equalsIgnoreCase("nb")||
+                            firstWord.equalsIgnoreCase("sb")||
+                            firstWord.equalsIgnoreCase("eb"))
+                    {
+                        for (int i = 1; i < partsOfName.length; i++)
+                        {
+                            partsOfName[i - 1] = partsOfName[i];
+                        }
+                        partsOfName[partsOfName.length - 1] = firstWord;
+                    }
+                    String treeInsertString="";
+                    for (int i =0; i < partsOfName.length; i++)
+                    {
+                        treeInsertString+=partsOfName[i];
+                    }
+                    newTree.put(treeInsertString,lineNumber);
+                    lineNumber++;
                 }
                 else
                 {
@@ -180,6 +251,7 @@ public class mainLine
             }
             bufferedReader.close();
             fileReader.close();
+            return newTree;
         } // End try
         catch (FileNotFoundException e)
         {
@@ -189,6 +261,7 @@ public class mainLine
         {
             e.printStackTrace();
         }
+        return null;
     }
 
     /**
@@ -237,6 +310,62 @@ public class mainLine
             edgeTo[w] = e;
             boolean contained=pq.decreaseKey(w, distTo[w]); //makes vertex less immediate if closer to start
             if(!contained) pq.insert (w, distTo[w]);    //adds vertex to queue if not already
+        }
+    }
+
+    void checkTimes()
+    {
+        try
+        {
+            FileReader fileReader = new FileReader("stop_times.txt");   //reads in textfile
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            boolean endOfFile = false;  //tracks end of file
+            bufferedReader.readLine();   //skip first line
+            while(!endOfFile)   //loop persists until end of file
+            {
+                String timeDetails = bufferedReader.readLine();   //read street information
+                if (stopDetails != null)
+                {
+                    String[] stopData = stopDetails.trim().split(",");   //separates information into array of three pieces of data
+                    String name= stopData[2];
+                    String[] partsOfName = name.trim().split(" ");
+                    String firstWord= partsOfName[0];
+                    if(firstWord.equalsIgnoreCase("flagstop")||
+                            firstWord.equalsIgnoreCase("wb")||
+                            firstWord.equalsIgnoreCase("nb")||
+                            firstWord.equalsIgnoreCase("sb")||
+                            firstWord.equalsIgnoreCase("eb"))
+                    {
+                        for (int i = 1; i < partsOfName.length; i++)
+                        {
+                            partsOfName[i - 1] = partsOfName[i];
+                        }
+                        partsOfName[partsOfName.length - 1] = firstWord;
+                    }
+                    String treeInsertString="";
+                    for (int i =0; i < partsOfName.length; i++)
+                    {
+                        treeInsertString+=partsOfName[i];
+                    }
+                    newTree.put(treeInsertString,lineNumber);
+                    lineNumber++;
+                }
+                else
+                {
+                    endOfFile = true;   //ends loop once file is empty
+                }
+            }
+            bufferedReader.close();
+            fileReader.close();
+            return newTree;
+        } // End try
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
         }
     }
 }
