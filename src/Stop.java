@@ -14,7 +14,7 @@ public class Stop
 
     void createTrip(double distance, Stop destination)
     {
-        Trip newTrip = new Trip(distance, destination);
+        Trip newTrip = new Trip(distance, number, destination);
         trips.add(newTrip);
     }
 
